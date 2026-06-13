@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>剛剛好 115 年度第 20 次主管會議</title>
+  <title>會議議程工具</title>
   <style>
     :root {
       color-scheme: light;
@@ -720,7 +720,7 @@
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <strong>主管會議紀錄工具</strong>
+          <strong>會議議程工具</strong>
           <span>MEETING AGENDA / MINUTES</span>
         </div>
         <button class="icon-btn" type="button" id="expandAll" aria-label="展開全部" title="展開全部">□</button>
@@ -733,7 +733,7 @@
     </header>
 
     <section class="hero" id="meetingInfo">
-      <h1>剛剛好室內裝修有限公司<br>主管會議</h1>
+      <h1>剛剛好室內裝修有限公司<br><span id="meetingTopicTitle">主管會議</span></h1>
       <div class="form-grid">
         <div class="inline-fields short-fields">
           <div>
@@ -1021,7 +1021,15 @@
     function fileBaseName() {
       const year = state.meeting.year || "年度";
       const number = state.meeting.number || "次";
-      return `剛剛好${year}年度第${number}次主管會議議程`;
+      const topic = state.meeting.topic || "會議";
+      return sanitizeFileName(`剛剛好${year}年度第${number}次${topic}議程`);
+    }
+
+    function sanitizeFileName(name) {
+      return String(name || "會議議程")
+        .replace(/[\\/:*?"<>|]/g, "")
+        .replace(/\s+/g, "")
+        .trim() || "會議議程";
     }
 
     function buildDocxBlob() {
@@ -1195,9 +1203,18 @@
         input.value = byPath(input.dataset.save);
         input.oninput = () => {
           byPath(input.dataset.save, input.value);
+          if (input.dataset.save === "meeting.topic") updateDynamicTitles();
           saveState();
         };
       });
+      updateDynamicTitles();
+    }
+
+    function updateDynamicTitles() {
+      const topic = state.meeting.topic || "會議";
+      const title = document.getElementById("meetingTopicTitle");
+      if (title) title.textContent = topic;
+      document.title = `會議議程工具 - ${topic}`;
     }
 
     function renderProposals() {
